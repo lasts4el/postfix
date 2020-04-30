@@ -1,0 +1,80 @@
+diff -cr src.orig/smtpd/smtpd_check.c src/smtpd/smtpd_check.c
+*** src.orig/smtpd/smtpd_check.c	2020-04-30 19:55:53.474361551 +0000
+--- src/smtpd/smtpd_check.c	2020-04-30 19:56:03.452905286 +0000
+***************
+*** 4045,4051 ****
+  #define IF_ENCRYPTED(x, y) ((state->tls_context && ((x) != 0)) ? (x) : (y))
+  			  SEND_ATTR_STR(MAIL_ATTR_CCERT_SUBJECT, subject),
+  			  SEND_ATTR_STR(MAIL_ATTR_CCERT_ISSUER, issuer),
+! 
+      /*
+       * When directly checking the fingerprint, it is OK if the issuing CA is
+       * not trusted.
+--- 4045,4053 ----
+  #define IF_ENCRYPTED(x, y) ((state->tls_context && ((x) != 0)) ? (x) : (y))
+  			  SEND_ATTR_STR(MAIL_ATTR_CCERT_SUBJECT, subject),
+  			  SEND_ATTR_STR(MAIL_ATTR_CCERT_ISSUER, issuer),
+! 		          /* start - add by yguion */	
+! 			  SEND_ATTR_STR("ccert_serial", state->tls_context->peer_serial),
+! 			  /* end - add by yguion */
+      /*
+       * When directly checking the fingerprint, it is OK if the issuing CA is
+       * not trusted.
+Only in src/smtpd: smtpd_check.c.orig
+diff -cr src.orig/tls/tls.h src/tls/tls.h
+*** src.orig/tls/tls.h	2020-04-30 19:55:53.488444828 +0000
+--- src/tls/tls.h	2020-04-30 19:57:23.804503104 +0000
+***************
+*** 266,271 ****
+--- 266,274 ----
+      const char *srvr_sig_curve;		/* server's ECDSA curve name */
+      int     srvr_sig_bits;		/* server's RSA signature key bits */
+      const char *srvr_sig_dgst;		/* server's signature digest */
++     /* start - add by yguion */
++     char*    peer_serial;               /* hex peer certificate serialNumber */
++      /* end - add by yguion */
+      /* Private. */
+      SSL    *con;
+      char   *cache_type;			/* tlsmgr(8) cache type if enabled */
+diff -cr src.orig/tls/tls_server.c src/tls/tls_server.c
+*** src.orig/tls/tls_server.c	2020-04-30 19:55:53.491694815 +0000
+--- src/tls/tls_server.c	2020-04-30 19:56:03.455071944 +0000
+***************
+*** 917,923 ****
+       */
+      peer = SSL_get_peer_certificate(TLScontext->con);
+      if (peer != NULL) {
+! 	TLScontext->peer_status |= TLS_CERT_FLAG_PRESENT;
+  	if (SSL_get_verify_result(TLScontext->con) == X509_V_OK)
+  	    TLScontext->peer_status |= TLS_CERT_FLAG_TRUSTED;
+  
+--- 917,931 ----
+       */
+      peer = SSL_get_peer_certificate(TLScontext->con);
+      if (peer != NULL) {
+!         /* start - add by yguion */
+!         ASN1_INTEGER *sn;
+!         BIGNUM * bn;
+!         sn = X509_get_serialNumber(peer);
+!         bn = ASN1_INTEGER_to_BN(sn, NULL);
+!         TLScontext->peer_serial = BN_bn2hex(bn);
+!         OPENSSL_free(bn);
+! 	/* end - add by yguion */
+!         TLScontext->peer_status |= TLS_CERT_FLAG_PRESENT;
+  	if (SSL_get_verify_result(TLScontext->con) == X509_V_OK)
+  	    TLScontext->peer_status |= TLS_CERT_FLAG_TRUSTED;
+  
+***************
+*** 928,933 ****
+--- 936,945 ----
+  	    X509_NAME_oneline(X509_get_issuer_name(peer),
+  			      buf, sizeof(buf));
+  	    msg_info("issuer=%s", printable(buf, '?'));
++ 	   /* start - add by yguion */
++             msg_info("serial=%s",printable(TLScontext->peer_serial,'?'));
++            /* end - add by yguion */
++ 
+  	}
+  	TLScontext->peer_CN = tls_peer_CN(peer, TLScontext);
+  	TLScontext->issuer_CN = tls_issuer_CN(peer, TLScontext);
+Only in src/tls: tls_server.c.orig
