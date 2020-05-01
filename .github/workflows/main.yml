@@ -24,10 +24,10 @@ jobs:
           RELEASE_TAG: v3.5.1
           RELEASE_GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         uses: docker://yoannguion/rpmbuilder:el7
-  - name: build rpm el8
-      env:
-        SPEC_FILE: postfix.spec
-        RELEASE_TAG: v3.5.1
-        RELEASE_GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      uses: docker://yoannguion/rpmbuilder
+      - name: build rpm el8
+        env:
+          SPEC_FILE: postfix.spec
+          RELEASE_TAG: v3.5.1
+          RELEASE_GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        uses: docker://yoannguion/rpmbuilder
 
