@@ -624,6 +624,7 @@ exit 0
 %attr(0755, root, root) %{postfix_daemon_dir}/postfix-script
 %attr(0755, root, root) %{postfix_daemon_dir}/postfix-tls-script
 %attr(0755, root, root) %{postfix_daemon_dir}/postfix-wrapper
+%attr(0755, root, root) %{postfix_daemon_dir}/postlogd
 %attr(0755, root, root) %{postfix_daemon_dir}/postmulti-script
 %attr(0755, root, root) %{postfix_daemon_dir}/postscreen
 %attr(0755, root, root) %{postfix_daemon_dir}/proxymap
