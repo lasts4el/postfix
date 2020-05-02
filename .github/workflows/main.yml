@@ -6,7 +6,7 @@ name: buildrpms
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ el7 ]
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -18,10 +18,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - name: build rpm el8
+      - name: build rpm el7
         env:
           SPEC_FILE: postfix.spec
           RELEASE_TAG: v3.5.1
           RELEASE_GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-        uses: docker://yoannguion/rpmbuilder
+        uses: docker://yoannguion/rpmbuilder:el7
 

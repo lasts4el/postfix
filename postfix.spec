@@ -99,13 +99,13 @@ Patch10: pflogsumm-1.1.5-ipv6-warnings-fix.patch
 
 # Determine the different packages required for building postfix
 BuildRequires: libdb-devel, perl-generators, pkgconfig, zlib-devel
-BuildRequires: systemd-units, libicu-devel, libnsl2-devel
+BuildRequires: systemd-units, libicu-devel,  glibc-devel
 BuildRequires: gcc, m4
 
 %{?with_ldap:BuildRequires: openldap-devel}
 %{?with_sasl:BuildRequires: cyrus-sasl-devel}
 %{?with_pcre:BuildRequires: pcre-devel}
-%{?with_mysql:BuildRequires: mariadb-connector-c-devel}
+%{?with_mysql:BuildRequires: mariadb-devel}
 %{?with_pgsql:BuildRequires: postgresql-devel}
 %{?with_sqlite:BuildRequires: sqlite-devel}
 %{?with_cdb:BuildRequires: tinycdb-devel}
@@ -242,7 +242,7 @@ CCARGS="${CCARGS} -fsigned-char"
 %endif
 %if %{with mysql}
   CCARGS="${CCARGS} -DHAS_MYSQL -I%{_includedir}/mysql"
-  AUXLIBS_MYSQL="-L%{_libdir}/mariadb -lmysqlclient -lm"
+  AUXLIBS_MYSQL="-L%{_libdir}/mysql -lmysqlclient -lm"
 %endif
 %if %{with pgsql}
   CCARGS="${CCARGS} -DHAS_PGSQL -I%{_includedir}/pgsql"
